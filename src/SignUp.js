@@ -10,12 +10,9 @@ const SignUp = (props) => {
         <div className="h2 mb-4">Sign Up</div>
         <Formik
           initialValues={{ email: '', password: '' }}
-          onSubmit={(values, actions) => {
+          onSubmit={(values) => {
             const {email, password} = values;
-            !email || !password ? alert('Error: empty fields!') :
-            props.createUserWithEmailAndPassword(email, password).catch(error => {
-              actions.setSubmitting(false);
-            })
+            props.createUserWithEmailAndPassword(email, password)
         }}>
         {props => (
           <Form>
@@ -32,7 +29,7 @@ const SignUp = (props) => {
               <Field type="password" name="password" placeholder="Your Password" id="password" className="form-control" autoComplete="new-password"/>
             </div>
           {props.errors.name && <div id="feedback">{props.errors.name}</div>}
-          <button type="submit" className="mt-3 mb-3 btn btn-light">
+          <button type="submit" className="mt-3 mb-3 btn btn-primary">
             Sign up
           </button>
           </Form>
@@ -40,10 +37,11 @@ const SignUp = (props) => {
         </Formik>
         <p className="h6">
           Already have an account?{" "}
-          <Link to="/" className="">
+          <Link to="/" className="ml-2" onClick={() => props.setError(null)}>
             Sign in here
           </Link>
         </p>
+        <span className="h6"> or sign up with <button type="button" className="btn btn-primary" onClick={props.signInWithGoogle}>Google</button></span> 
       </div>
     
     </div>

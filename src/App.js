@@ -1,5 +1,5 @@
 import React from 'react'
-import firebase  from 'firebase';
+import firebase from 'firebase';
 import firebaseConfig from './firebase';
 import { Router } from "@reach/router";
 import SignIn from "./SignIn";
@@ -14,7 +14,9 @@ const firebaseAppAuth = firebaseApp.auth();
 // const createComponentWithAuth = withFirebaseAuth({
 //   firebaseAppAuth,
 // });
-
+const providers = {
+  googleProvider: new firebase.auth.GoogleAuthProvider(),
+};
 const App = ({
   /** These props are provided by withFirebaseAuth HOC */
   signInWithEmailAndPassword,
@@ -30,15 +32,24 @@ const App = ({
   error,
   loading,
 }) => (    
-  <React.Fragment>
-    {
-      user
+  <React.Fragment>    
+    {user
         ? <CreateProjectForm signOut={signOut}/>
         : <Router>
-            <SignUp path="signUp" createUserWithEmailAndPassword={createUserWithEmailAndPassword}/>
-            <SignIn path="/" error={error} signInWithEmailAndPassword={signInWithEmailAndPassword}/>
+            <SignUp path="signUp" setError={setError} 
+            signInWithGoogle={signInWithGoogle} 
+            createUserWithEmailAndPassword={createUserWithEmailAndPassword}/>
+            <SignIn path="/" setError={setError} 
+            signInWithGoogle={signInWithGoogle} 
+            signInWithEmailAndPassword={signInWithEmailAndPassword}/>
           </Router>
     }
+    {
+      user
+        ? setError(null)
+        : null
+    }
+    {<div className="container small text-center">{error ? error : null}</div>}
    </React.Fragment>
 );
  
@@ -46,5 +57,6 @@ const App = ({
 
 export default withFirebaseAuth({
   firebaseAppAuth,
+  providers
 })(App);
 
