@@ -1,8 +1,49 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Formik, Form, Field, FieldArray } from "formik";
 import Tasks from "./Tasks";
+import {database} from './firebase';
 
 function CreateProjectForm(props) {
+  const [forMap, setForMap] = useState([])
+
+  useEffect( () => {
+     database.ref(`${props.user.uid}`).on("value", snapshot => {
+      let allItems =  [];
+       snapshot.forEach(snap => {
+        allItems.push(snap.val());
+      });
+      setForMap({ allItems });
+  });  
+
+},[]);
+
+
+// useEffect(() => {
+//   const fetchData = async () => {
+//     const result = await axios(
+//       'https://hn.algolia.com/api/v1/search?query=redux',
+//     );
+
+//     setData(result.data);
+//   };
+
+//   fetchData();
+// }, []);
+
+
+
+  // console.log(forMap[0].projkey)
+
+  //   return ref.on('projvalue', snapshot => {
+  //     const state = snapshot.val();
+  //   });
+  // }
+  // const writeUserData = () => {
+  //   database().ref(`${props.user.uid}`).set(getUserData());
+  // }
+
+  // const gospodi = getUserData();
+  // console.log(gospodi)
   return (
     <div className="container mt-5 border border-light rounded p-4">
       <div className="d-flex justify-content-between align-items-center">
@@ -17,7 +58,7 @@ function CreateProjectForm(props) {
       </div>
       <Formik
         initialValues={{ title: "", description: "", arrProjInfo: [], id: 1 }}
-        onSubmit={{}}>
+        onSubmit={null}>
 
         {({ values }) => (
           <Form>
@@ -55,20 +96,25 @@ function CreateProjectForm(props) {
                           values.title
                         } Description: ${values.description}`
                       });
+                      database.ref(`${props.user.uid}`).push({projkey: Date.now(), "projvalue": `id: ${values.id - 1} Project: ${
+                          values.title
+                        } Description: ${values.description}`, "tasks" : [{
+                        "taskkey": "",
+                        "taskvalue": ""}]});
                       values.title = "";
                       values.description = "";
                     }}
                   >
                     Add
                   </button>
-                  {values.arrProjInfo.map((item, index) => (
+                  {forMap.map((item, index) => (
                     <ul
-                      key={values.arrProjInfo[index].key}
+                      key={item.projkey}
                       className="p-2 mt-2 border border-light"
                     >
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="h5">
-                          {values.arrProjInfo[index].value}
+                          {item.projvalue}
                         </span>
                         <button
                           type="button"
