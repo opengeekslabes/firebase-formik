@@ -42,8 +42,7 @@ function CreateProjectForm(props) {
   //   database().ref(`${props.user.uid}`).set(getUserData());
   // }
 
-  // const gospodi = getUserData();
-  // console.log(gospodi)
+
   return (
     <div className="container mt-5 border border-light rounded p-4">
       <div className="d-flex justify-content-between align-items-center">
