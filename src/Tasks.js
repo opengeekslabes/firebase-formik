@@ -1,128 +1,131 @@
-import React, { useState } from "react";
-import EditButton from './EditButton';
+import React, { useEffect, useState } from "react";
+import { Formik, Form, Field } from "formik";
+import { database } from "./firebase";
+import EditButton from "./EditButton";
 
-function Tasks (props) {
-  const [value, setValue] = useState("");
-  const [arr, setArr] = useState([]);
+function Tasks(props) {
+  const [forMap, setForMap] = useState([]);
+  const [editIndex, setEditIndex] = useState(-1);
   const [editAreaValue, setAreaValue] = useState("");
-  const [editIndex, setEditIndex] = useState("");
-  const [doneIndexArr, setDoneIndexArr] = useState([]);
-  
-  const handleAdd = () => {
-    if (!value) {
-      alert(props.errorMessage);
-      return;
-    }
-    setArr(arr => [...arr, {key: Date.now(), value: value}])
-    setValue("")
-  };
+  const value = `${String.fromCharCode(9745)} is done`;
 
-  const handleRemove = ind => {
-    let id = arr[ind].key;
-
-    if (doneIndexArr.includes(id)) {
-      let del = doneIndexArr.indexOf(id);
-      doneIndexArr.splice(del, 1);
-    }
-
-    let result = arr.filter((item, index) => {
-    return ind !== index
+  useEffect(() => {
+    database.ref(`${props.user}/${props.index}/tasks`).on("value", snapshot => {
+      let allItems = [];
+      snapshot.forEach(snap => {
+        allItems.push(snap.val());
+      });
+      setForMap(allItems);
     });
-
-    setArr(result)
-    setDoneIndexArr(doneIndexArr);
-  };
+  }, [props.user, props.index]);
 
   const handleEdit = (item, index) => {
+    setAreaValue(
+      item.includes(value) ? item.slice(0, item.length - value.length) : item
+    );
     setEditIndex(index);
   };
 
-  const handleSave = (item, index) => {
-    let value = !editAreaValue ? item : editAreaValue;
-    arr[index].value = value;
+  const handleSave = item => {
+    const value = !editAreaValue ? item.taskvalue : editAreaValue;
+    database
+      .ref(`${props.user}/${props.index}/tasks/${item.taskid}`)
+      .update({ taskkey: Date.now(), taskvalue: value });
     setEditIndex("");
   };
 
-  const handleDone = index => {
-    let id = arr[index].key;
-    let newArr = doneIndexArr.slice();
-
-    let del = newArr.indexOf(id);
-    newArr.includes(id)
-      ? newArr.splice(del, 1)
-      : newArr.push(id);
-    setDoneIndexArr(newArr)
+  const handleDone = item => {
+    database.ref(`${props.user}/${props.index}/tasks/${item.taskid}`).update({
+      taskkey: Date.now(),
+      taskvalue: item.taskvalue.includes(value)
+        ? item.taskvalue.slice(0, item.taskvalue.length - value.length)
+        : item.taskvalue + value
+    });
   };
-
-  let arrValues = [];
-  let arrKeys = [];
-
-  for (let item of arr) {
-    arrValues.push(item.value);
-    arrKeys.push(item.key);
-  }
 
   return (
     <div className="form-group">
       <div className="h6">Add new tasks</div>
-      <textarea
-        className="form-control"
-        value={value}
-        name="value"
-        rows="2"
-        onChange={(e) => { setValue(e.target.value)} }
-      />
-      <button
-        type="button"
-        className="btn btn-light"
-        onClick={handleAdd}
+      <Formik
+        initialValues={{
+          value: "",
+          taskId: 1
+        }}
+        onSubmit={null}
       >
-        Add
-      </button>
-      <ul>
-        {arrValues.map((item, index) => (
-          <div key={arrKeys[index]} className="p-2 mt-2 border border-light">
-            {editIndex !== index ? (
-              <li className="h6">
-                {doneIndexArr.includes(arrKeys[index])
-                  ? `${item} ${String.fromCharCode(9745)} is done`
-                  : item}
-              </li>
-            ) : (
-              <textarea
-                className="h6"
-                name="editArea"
-                id="editArea"
-                rows="2"
-                defaultValue={item}
-                onChange={(e) => { setAreaValue(e.target.value)} } 
-              />
-            )}
-            <hr />
-            <button
-              type="button"
-              className="btn btn-light mr-4"
-              onClick={() => handleDone(index)}
-            >
-              {String.fromCharCode(10004)}
-            </button>
-            <EditButton
-              item={item}
-              index={index}
-              handleEdit={() => handleEdit(item, index)}
-              handleSave={() => handleSave(item, index)}
-              isEditing={editIndex !== index}
+        {({ values }) => (
+          <Form>
+            <Field
+              as="textarea"
+              name="value"
+              id="value"
+              className="form-control"
+              rows="2"
             />
             <button
               type="button"
               className="btn btn-light"
-              onClick={() => handleRemove(index)}
+              onClick={() => {
+                const userRef = database.ref(`${props.user}/${props.index}/tasks`);
+                userRef.child(`${values.taskId}`).set({
+                  taskid: values.taskId++,
+                  taskkey: Date.now(),
+                  taskvalue: values.value
+                });
+                values.value = "";
+              }}
             >
-              {String.fromCharCode(10007)}
+              Add
             </button>
-          </div>
-        ))}
-      </ul>
+
+            <ul>
+              {forMap.map((item, index) => (
+                <div
+                  key={item.taskkey}
+                  className="p-2 mt-2 border border-light"
+                >
+                  {editIndex !== index ? (
+                    <li className="h6">{item.taskvalue}</li>
+                  ) : (
+                    <textarea
+                      className="h6"
+                      name="editArea"
+                      id="editArea"
+                      rows="2"
+                      defaultValue={editAreaValue}
+                      onChange={e => {setAreaValue(e.target.value);}}
+                    />
+                  )}
+
+                  <hr />
+                  <button
+                    type="button"
+                    className="btn btn-light mr-4"
+                    onClick={() => handleDone(item)}
+                  >
+                    {String.fromCharCode(10004)}
+                  </button>
+                  <EditButton
+                    item={item.taskvalue}
+                    index={index}
+                    handleEdit={() => handleEdit(item.taskvalue, index)}
+                    handleSave={() => handleSave(item)}
+                    isEditing={editIndex !== index}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-light"
+                    onClick={() =>
+                      database.ref(`${props.user}/${props.index}/tasks/${item.taskid}`).remove()}
+                  >
+                    {String.fromCharCode(10007)}
+                  </button>
+                </div>
+              ))}
+            </ul>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 }

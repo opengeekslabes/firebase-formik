@@ -23,15 +23,10 @@ const App = ({
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithGoogle,
-  signInWithFacebook,
-  signInWithGithub,
-  signInWithTwitter,
-  signInAnonymously,
   signOut,
   setError,
   user,
-  error,
-  loading,
+  error
 }) => (    
   <React.Fragment>    
           {user ?

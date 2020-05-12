@@ -1,11 +1,12 @@
 {
-  "user-email": [
-    {
+  "userid": [
+  {
       "projkey": "",
+      "projid": "",
       "projvalue": "",
-      "tasks" : [{
+      "tasks" : {
 	"taskkey": "",
-	"taskvalue": ""}]
+	"taskvalue": ""}
     }
   ]
 }
