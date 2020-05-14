@@ -1,7 +1,21 @@
 import React, {useEffect, useState} from "react";
 import { Formik, Form, Field } from "formik";
 import Tasks from "./Tasks";
-import {database} from './firebase';
+import {database} from '../firebase/firebase';
+
+import { connect } from "react-redux";
+
+const mapStateToProps = state => {
+  return {
+    forMap: state.age
+  };
+};
+
+const mapDispachToProps = dispatch => {
+  return {
+    onRemove: () => dispatch({ type: "PROJECT_REMOVER" }),
+  };
+};
 
 function CreateProjectForm(props) {
   const [forMap, setForMap] = useState([])
@@ -16,37 +30,6 @@ function CreateProjectForm(props) {
   });  
 },[props.user.uid]);
 
-<<<<<<< HEAD
-},[]);
-
-
-// useEffect(() => {
-//   const fetchData = async () => {
-//     const result = await axios(
-//       'https://hn.algolia.com/api/v1/search?query=redux',
-//     );
-
-//     setData(result.data);
-//   };
-
-//   fetchData();
-// }, []);
-
-
-
-  // console.log(forMap[0].projkey)
-
-  //   return ref.on('projvalue', snapshot => {
-  //     const state = snapshot.val();
-  //   });
-  // }
-  // const writeUserData = () => {
-  //   database().ref(`${props.user.uid}`).set(getUserData());
-  // }
-
-
-=======
->>>>>>> 7ac0159... WIP
   return (
     <div className="container mt-5 border border-light rounded p-4">
       <div className="d-flex justify-content-between align-items-center">
@@ -130,4 +113,7 @@ function CreateProjectForm(props) {
   );
 }
 
-export default CreateProjectForm;
+export default connect(
+  null,
+  mapDispachToProps
+)(CreateProjectForm);

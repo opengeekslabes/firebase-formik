@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
-import { database } from "./firebase";
+import { database } from "../firebase/firebase";
 import EditButton from "./EditButton";
 
 function Tasks(props) {

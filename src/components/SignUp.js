@@ -3,7 +3,6 @@ import { Link } from "@reach/router";
 import { Formik, Form, Field } from 'formik';
 
 const SignUp = (props) => {
-
   return (
     <div className="container">
       <div className="mt-3 mb-3 p-4 border border-light">
